@@ -1,0 +1,302 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.admin-panel {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.92));
+}
+
+.admin-surface,
+.admin-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.92));
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+}
+
+.sidebar-link {
+  width: 100%;
+  text-align: left;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.9rem;
+  padding: 0.62rem 0.7rem;
+  font-size: 0.86rem;
+  color: #334155;
+  background: #fff;
+}
+
+.sidebar-link:hover {
+  background: #f8fafc;
+}
+
+.sidebar-link.is-active {
+  background: #0f172a;
+  color: #fff;
+  border-color: #0f172a;
+}
+
+.builder-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 0.85rem;
+  background: #fff;
+  cursor: grab;
+}
+
+.builder-card.dragging {
+  opacity: 0.55;
+}
+
+.builder-grid {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 0.75rem;
+}
+
+.builder-thumb {
+  width: 96px;
+  height: 96px;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.builder-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.period-btn {
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  color: #334155;
+  background: #fff;
+}
+
+.period-btn.is-active {
+  background: #0f172a;
+  color: #fff;
+  border-color: #0f172a;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 60px;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.bar-track {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0f172a, #2563eb);
+  border-radius: 999px;
+}
+
+@media (max-width: 1023px) {
+  #adminSidebar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+}
+
+/* Preview Styles */
+#previewContainer {
+  background: #f0f1f5;
+}
+
+.store-banner {
+  background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-product {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.preview-product:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.preview-product-image {
+  width: 100%;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.preview-product-info {
+  padding: 0.75rem;
+}
+
+.preview-product-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-product-price {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.preview-category {
+  background: linear-gradient(135deg, #dbeafe 0%, #ddd6fe 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 1rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.preview-category-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+/* Elementos padrão - desktop e mobile */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="file"],
+select,
+textarea {
+  padding: 10px 14px;
+  font-size: 14px;
+  min-height: 40px;
+  border-radius: 8px;
+}
+
+button,
+input[type="submit"],
+input[type="button"] {
+  padding: 10px 16px;
+  font-size: 14px;
+  min-height: 40px;
+  cursor: pointer;
+  user-select: none;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+input[type="color"] {
+  min-height: 40px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* Certificar que elementos são clicáveis */
+* {
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+button:disabled,
+input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Color inputs no produto */
+.color-picker {
+  flex-shrink: 0;
+}
+
+.color-picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-picker::-webkit-color-swatch {
+  border: none;
+  border-radius: 6px;
+}
+
+.color-hex-input {
+  text-transform: uppercase;
+}
+
+/* Sidebar backdrop para mobile */
+#sidebar-backdrop {
+  backdrop-filter: blur(4px);
+  transition: opacity 0.3s ease;
+}
+
+/* Sidebar animação no mobile */
+#sidebar {
+  transition: transform 0.3s ease;
+}
+
+/* Mobile Responsive - Aumentar tamanho dos elementos */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="password"],
+  input[type="file"],
+  input[type="color"],
+  select,
+  textarea {
+    padding: 12px 14px;
+    font-size: 16px;
+    min-height: 44px;
+    border-radius: 8px;
+  }
+
+  button,
+  input[type="submit"],
+  input[type="button"] {
+    padding: 12px 14px;
+    font-size: 15px;
+    min-height: 44px;
+  }
+
+  .menu-btn {
+    padding: 12px 14px;
+    font-size: 15px;
+    min-height: 44px;
+  }
+
+  label {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  /* Color input - melhor para toque */
+  input[type="color"] {
+    height: 44px;
+    cursor: pointer;
+  }
+}
+
+
+

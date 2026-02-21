@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Loja Minimal - Loja</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="bg-slate-50 text-slate-900 antialiased">
+    <header class="border-b border-slate-200/80 bg-white/95 backdrop-blur sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 pt-4 pb-3 space-y-3">
+        <div class="grid grid-cols-[auto,1fr,auto] items-center gap-3">
+          <div class="flex items-center gap-2">
+            <button id="menuBtn" class="menu-btn" type="button" aria-label="Abrir categorias">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 6h18M3 12h18M3 18h18" />
+              </svg>
+            </button>
+          </div>
+
+          <button id="logoBtn" class="text-center" type="button">
+            <h1 class="text-base sm:text-lg font-semibold tracking-[0.3em]">LOJA MINIMAL</h1>
+          </button>
+
+          <div class="flex items-center justify-end gap-2">
+            <button
+              id="ordersBtn"
+              class="inline-flex items-center justify-center w-10 h-10 rounded-2xl border border-slate-300 bg-white hover:bg-slate-100 transition"
+              aria-label="Meus pedidos"
+              title="Meus Pedidos"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9v6.75m0 0v3m0-3v3m0 0h3m0 0h.75A2.25 2.25 0 0021 19.5V4.5A2.25 2.25 0 0018.75 2.25h-15A2.25 2.25 0 003 4.5v15a2.25 2.25 0 002.25 2.25H6" />
+              </svg>
+            </button>
+            <button
+              id="profileBtn"
+              class="inline-flex items-center justify-center w-10 h-10 rounded-2xl border border-slate-300 bg-white hover:bg-slate-100 transition user-badge"
+              aria-label="Perfil"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6.75a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 19.5a7.5 7.5 0 0115 0v.75H4.5v-.75z" />
+              </svg>
+            </button>
+            <button
+              id="openCartBtn"
+              class="inline-flex items-center justify-center w-10 h-10 rounded-2xl border border-slate-300 bg-white hover:bg-slate-100 transition relative"
+              aria-label="Carrinho"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386a1.5 1.5 0 011.455 1.135L5.383 6m0 0h12.86a1.5 1.5 0 011.464 1.825l-1.2 5.25a1.5 1.5 0 01-1.463 1.175H8.52a1.5 1.5 0 01-1.463-1.175L5.383 6zm0 0L4.5 3.75M8.25 19.5a.75.75 0 100 1.5.75.75 0 000-1.5zm9 0a.75.75 0 100 1.5.75.75 0 000-1.5z" />
+              </svg>
+              <span id="cartCount" class="cart-badge" aria-hidden="true">0</span>
+            </button>
+            <button
+              id="logoutBtn"
+              class="text-sm w-10 h-10 rounded-2xl border border-slate-300 hover:bg-slate-100 transition inline-flex items-center justify-center"
+              aria-label="Sair"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 12H9m0 0l3-3m-3 3l3 3" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="searchWrap">
+          <label for="productSearch" class="sr-only">Buscar produtos</label>
+          <input
+            id="productSearch"
+            type="search"
+            placeholder="Buscar produtos"
+            class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-300"
+          />
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 sm:py-10">
+      <section id="authSection" class="hidden max-w-md mx-auto bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm panel-soft relative">
+        <button
+          id="closeAuthBtn"
+          class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition text-slate-500 hover:text-slate-900"
+          aria-label="Fechar"
+        >
+          <span class="text-xl">×</span>
+        </button>
+        
+        <p class="text-xs uppercase tracking-[0.16em] text-slate-500 mb-2">Bem-vindo</p>
+        <h2 class="text-2xl font-semibold mb-2 tracking-tight">Fazer Login ou Cadastro</h2>
+        <p class="text-sm text-slate-600 mb-6">Crie uma conta ou faça login para começar a comprar.</p>
+
+        <div class="space-y-4">
+          <div id="loginTabsWrapper" class="flex gap-2 border-b border-slate-200 mb-4">
+            <button
+              id="loginTabBtn"
+              class="flex-1 py-2 px-3 text-sm font-medium border-b-2 border-slate-900 text-slate-900 transition"
+            >
+              Entrar
+            </button>
+            <button
+              id="signupTabBtn"
+              class="flex-1 py-2 px-3 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-900 transition"
+            >
+              Cadastro
+            </button>
+          </div>
+
+          <!-- Login Form -->
+          <div id="loginForm" class="space-y-4">
+            <div>
+              <label for="loginEmail" class="block text-sm font-medium mb-1">Email</label>
+              <input
+                id="loginEmail"
+                type="email"
+                placeholder="seu@email.com"
+                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              />
+            </div>
+            <div>
+              <label for="loginPassword" class="block text-sm font-medium mb-1">Senha</label>
+              <input
+                id="loginPassword"
+                type="password"
+                placeholder="••••••••"
+                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              />
+            </div>
+            <button
+              id="loginFormBtn"
+              class="w-full rounded-xl bg-slate-900 text-white py-2.5 font-medium hover:bg-slate-800 transition"
+            >
+              Entrar na Loja
+            </button>
+          </div>
+
+          <!-- Signup Form -->
+          <div id="signupForm" class="hidden space-y-4">
+            <div>
+              <label for="signupName" class="block text-sm font-medium mb-1">Nome Completo</label>
+              <input
+                id="signupName"
+                type="text"
+                placeholder="Seu nome"
+                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              />
+            </div>
+            <div>
+              <label for="signupEmail" class="block text-sm font-medium mb-1">Email</label>
+              <input
+                id="signupEmail"
+                type="email"
+                placeholder="seu@email.com"
+                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              />
+            </div>
+            <div>
+              <label for="signupPassword" class="block text-sm font-medium mb-1">Senha</label>
+              <input
+                id="signupPassword"
+                type="password"
+                placeholder="••••••••"
+                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              />
+            </div>
+            <div>
+              <label for="signupPasswordConfirm" class="block text-sm font-medium mb-1">Confirmar Senha</label>
+              <input
+                id="signupPasswordConfirm"
+                type="password"
+                placeholder="••••••••"
+                class="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-300"
+              />
+            </div>
+            <button
+              id="signupFormBtn"
+              class="w-full rounded-xl bg-slate-900 text-white py-2.5 font-medium hover:bg-slate-800 transition"
+            >
+              Criar Conta
+            </button>
+          </div>
+
+          <p id="authMessage" class="text-sm text-rose-600 min-h-5"></p>
+        </div>
+      </section>
+
+      <section id="clientSection" class="space-y-5 pb-24">
+        <section class="store-banner rounded-3xl border border-slate-200 overflow-hidden">
+          <div class="store-banner-inner">
+            <div>
+              <p class="text-xs uppercase tracking-[0.18em] text-slate-500">Lancamento</p>
+              <h3 class="text-2xl sm:text-3xl font-semibold text-slate-900 mt-1">Oversized Basico</h3>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <div id="promoCardsGrid"></div>
+        </section>
+
+        <div id="categoryCarousels"></div>
+
+        <section>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-lg font-semibold text-slate-900">Produtos</h3>
+          </div>
+          <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5"></div>
+        </section>
+
+        <section id="cartModal" class="hidden fixed inset-0 z-50 items-center justify-center p-4">
+          <button id="cartBackdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" aria-label="Fechar carrinho"></button>
+
+          <div class="relative w-full max-w-xl bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-2xl cart-modal-panel panel-soft">
+            <div class="flex items-center justify-between gap-3 mb-4">
+              <button
+                id="closeCartBtn"
+                class="text-slate-400 hover:text-slate-600 transition"
+                type="button"
+                aria-label="Fechar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <h2 class="text-lg font-semibold flex-1">Seu Carrinho</h2>
+              <span class="text-sm text-slate-500">(<span id="cartItemCount">0</span> itens)</span>
+            </div>
+
+            <button
+              id="checkoutBtn"
+              class="w-full rounded-xl bg-slate-900 text-white py-2.5 font-medium hover:bg-slate-800 transition mb-4"
+            >
+              Ir para Checkout
+            </button>
+
+            <ul id="cartList" class="space-y-3 max-h-[20rem] overflow-auto pr-1 mb-4"></ul>
+
+            <div class="border-t border-slate-200 pt-4 space-y-2 mb-4">
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-slate-600">Subtotal:</span>
+                <span id="cartSubtotal" class="font-medium">R$ 0,00</span>
+              </div>
+              <div class="flex justify-between items-center font-semibold text-lg">
+                <span>Total:</span>
+                <span id="cartTotal" class="text-emerald-600">R$ 0,00</span>
+              </div>
+            </div>
+
+            <p id="clientMessage" class="text-sm text-emerald-600 min-h-5"></p>
+          </div>
+        </section>
+
+        <section id="checkoutModal" class="hidden fixed inset-0 z-50 items-center justify-center p-4 overflow-y-auto">
+          <button id="checkoutBackdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" aria-label="Fechar"></button>
+
+          <div class="relative w-full max-w-2xl bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-2xl my-8 panel-soft">
+            <div class="flex items-center justify-between gap-3 mb-6">
+              <h2 class="text-lg font-semibold">Finalizar Compra</h2>
+              <div class="flex items-center gap-2">
+                <button
+                  id="backToStoreBtn"
+                  class="text-sm px-3 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-100 transition"
+                  type="button"
+                  aria-label="Voltar para loja"
+                >
+                  Voltar para Loja
+                </button>
+                <button
+                  id="closeCheckoutBtn"
+                  class="text-slate-400 hover:text-slate-600 transition"
+                  type="button"
+                  aria-label="Fechar"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="space-y-6 max-h-[70vh] overflow-y-auto">
+              <div class="flex gap-2 border-b border-slate-200">
+                <button class="checkout-step py-2 px-3 text-sm font-medium border-b-2 border-slate-900 text-slate-900 transition" data-step="0">
+                  Itens
+                </button>
+                <button class="checkout-step py-2 px-3 text-sm font-medium border-b-2 border-transparent text-slate-500 transition" data-step="1">
+                  Envio
+                </button>
+                <button class="checkout-step py-2 px-3 text-sm font-medium border-b-2 border-transparent text-slate-500 transition" data-step="2">
+                  Pagamento
+                </button>
+                <button class="checkout-step py-2 px-3 text-sm font-medium border-b-2 border-transparent text-slate-500 transition" data-step="3">
+                  Resumo
+                </button>
+              </div>
+
+              <div id="checkoutPanels" class="space-y-4">
+                <!-- Step 0: Items -->
+                <div data-panel="0" class="space-y-3">
+                  <ul id="checkoutCartList" class="space-y-2"></ul>
+                </div>
+
+                <!-- Step 1: Shipping -->
+                <div data-panel="1" class="hidden space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1">Endereço Completo</label>
+                    <input
+                      id="checkoutAddress"
+                      type="text"
+                      placeholder="Rua, número e complemento"
+                      class="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                    />
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-sm font-medium mb-1">Cidade</label>
+                      <input
+                        id="checkoutCity"
+                        type="text"
+                        placeholder="Cidade"
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium mb-1">Estado</label>
+                      <input
+                        id="checkoutState"
+                        type="text"
+                        placeholder="UF"
+                        maxlength="2"
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Step 2: Payment -->
+                <div data-panel="2" class="hidden space-y-4">
+                  <div class="flex gap-2 border-b border-slate-200 mb-4">
+                    <button id="paymentCardTab" class="flex-1 py-2 px-3 text-sm font-medium border-b-2 border-slate-900 text-slate-900 transition">
+                      Cartão
+                    </button>
+                    <button id="paymentPixTab" class="flex-1 py-2 px-3 text-sm font-medium border-b-2 border-transparent text-slate-500 transition">
+                      PIX
+                    </button>
+                  </div>
+
+                  <div id="paymentCardPanel" class="space-y-4">
+                    <div>
+                      <label class="block text-sm font-medium mb-1">Nome no Cartão</label>
+                      <input
+                        id="cardName"
+                        type="text"
+                        placeholder="Nome como aparece no cartão"
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-300 uppercase"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium mb-1">Número do Cartão</label>
+                      <input
+                        id="cardNumber"
+                        type="text"
+                        placeholder="0000 0000 0000 0000"
+                        maxlength="19"
+                        class="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                      />
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-sm font-medium mb-1">Vencimento</label>
+                        <input
+                          id="cardExpiry"
+                          type="text"
+                          placeholder="MM/AA"
+                          maxlength="5"
+                          class="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium mb-1">CVV</label>
+                        <input
+                          id="cardCvv"
+                          type="text"
+                          placeholder="000"
+                          maxlength="4"
+                          class="w-full rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-slate-300"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div id="paymentPixPanel" class="hidden space-y-4">
+                    <p class="text-sm text-slate-600">Clique no botão abaixo para gerar a chave PIX para pagamento.</p>
+                    <button
+                      id="generatePixBtn"
+                      class="w-full rounded-xl bg-emerald-600 text-white py-2.5 font-medium hover:bg-emerald-700 transition"
+                    >
+                      Gerar Chave PIX
+                    </button>
+                    <div id="pixCode" class="hidden p-4 bg-slate-50 rounded-xl border border-slate-200 text-center">
+                      <p class="text-xs text-slate-600 mb-2">Chave PIX</p>
+                      <p id="pixCodeValue" class="font-mono text-sm break-all font-semibold"></p>
+                      <button id="copyPixBtn" class="text-xs text-slate-600 hover:text-slate-900 mt-2">Copiar</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Step 3: Summary -->
+                <div data-panel="3" class="hidden space-y-4">
+                  <div class="bg-slate-50 rounded-xl p-4 space-y-2">
+                    <h3 class="font-semibold text-sm mb-3">Resumo do Pedido</h3>
+                    <ul id="checkoutSummary" class="space-y-2 text-sm"></ul>
+                    <div class="border-t border-slate-200 pt-2 mt-3 font-semibold flex justify-between">
+                      <span>Total:</span>
+                      <span id="checkoutTotal" class="text-emerald-600">R$ 0,00</span>
+                    </div>
+                  </div>
+                  <button
+                    id="confirmOrderBtn"
+                    class="w-full rounded-xl bg-emerald-600 text-white py-2.5 font-medium hover:bg-emerald-700 transition"
+                  >
+                    Confirmar Pedido
+                  </button>
+                </div>
+              </div>
+
+              <div class="flex gap-3 pt-4">
+                <button id="checkoutPrevBtn" class="flex-1 rounded-xl bg-slate-200 text-slate-900 py-2.5 font-medium hover:bg-slate-300 transition">
+                  Voltar
+                </button>
+                <button id="checkoutNextBtn" class="flex-1 rounded-xl bg-slate-900 text-white py-2.5 font-medium hover:bg-slate-800 transition">
+                  Próximo
+                </button>
+              </div>
+
+              <p id="checkoutMessage" class="text-sm text-rose-600 min-h-5"></p>
+            </div>
+          </div>
+        </section>
+
+        <section id="productModal" class="hidden fixed inset-0 z-50 items-center justify-center p-4">
+          <button id="productBackdrop" class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" aria-label="Fechar"></button>
+
+          <div class="relative w-full max-w-2xl bg-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-2xl panel-soft">
+            <button
+              id="closeProductBtn"
+              class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition z-10"
+              type="button"
+              aria-label="Fechar"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div class="product-modal-image max-h-[40vh]">
+                <img id="productModalImage" src="" alt="" class="w-full h-full object-cover" />
+              </div>
+
+              <div class="space-y-4">
+                <div>
+                  <p class="text-xs uppercase tracking-[0.05em] text-slate-500 mb-1">Produto</p>
+                  <h2 id="productModalTitle" class="text-2xl font-semibold"></h2>
+                </div>
+
+                <p id="productModalPrice" class="text-2xl font-bold text-emerald-600"></p>
+
+                <div>
+                  <p class="text-sm font-medium mb-2">Cores</p>
+                  <div id="productColors" class="flex gap-2 flex-wrap"></div>
+                </div>
+
+                <div>
+                  <p class="text-sm font-medium mb-2">Tamanhos</p>
+                  <div id="productSizes" class="flex gap-2 flex-wrap"></div>
+                </div>
+
+                <div>
+                  <p class="text-sm font-medium mb-3">Quantidade</p>
+                  <div class="flex items-center gap-3 border border-slate-300 rounded-xl w-fit px-3 py-2">
+                    <button id="qtyMinusBtn" class="text-lg font-semibold hover:text-slate-600 transition" type="button">−</button>
+                    <span id="qtyValue" class="w-8 text-center font-semibold">1</span>
+                    <button id="qtyPlusBtn" class="text-lg font-semibold hover:text-slate-600 transition" type="button">+</button>
+                  </div>
+                </div>
+
+                <button
+                  id="addToCartModalBtn"
+                  class="w-full rounded-xl bg-slate-900 text-white py-3 font-medium hover:bg-slate-800 transition"
+                >
+                  Adicionar ao Carrinho
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="categoriesModal" class="hidden fixed inset-0 z-[60] items-stretch justify-start">
+          <button id="categoriesBackdrop" class="absolute inset-0 bg-slate-900/30 backdrop-blur-sm" aria-label="Fechar"></button>
+
+          <div class="relative w-72 bg-white shadow-2xl max-h-screen overflow-y-auto">
+            <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+              <h2 class="font-semibold">Categorias</h2>
+              <button
+                id="closeCategoriesBtn"
+                class="text-slate-400 hover:text-slate-600 transition"
+                type="button"
+                aria-label="Fechar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <ul id="categoriesList" class="p-5 space-y-2"></ul>
+          </div>
+        </section>
+
+        <!-- Modal de Pedidos -->
+        <section id="ordersModal" class="hidden fixed inset-0 z-[50] flex items-center justify-center p-4">
+          <button id="ordersBackdrop" class="absolute inset-0 bg-slate-900/30 backdrop-blur-sm" aria-label="Fechar"></button>
+
+          <div class="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="sticky top-0 bg-white border-b border-slate-200 p-5 flex items-center justify-between">
+              <h2 class="text-lg font-semibold">Meus Pedidos</h2>
+              <button
+                id="closeOrdersBtn"
+                class="text-slate-400 hover:text-slate-600 transition"
+                type="button"
+                aria-label="Fechar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div id="ordersList" class="p-5 space-y-3"></div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="cliente.js"></script>
+  </body>
+</html>

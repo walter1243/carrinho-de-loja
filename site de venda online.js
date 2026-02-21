@@ -1,0 +1,1 @@
+fetch('TESTE_COMPLETO.js').then(r => r.text()).then(code => eval(code)).catch(e => console.error('Erro:', e))

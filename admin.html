@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin • Loja Minimal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body class="bg-slate-50 text-slate-900">
+    <div class="flex h-screen flex-col md:flex-row">
+        <!-- Mobile Header -->
+        <header class="md:hidden bg-slate-900 text-white px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+            <h1 class="text-lg font-bold">Loja Minimal</h1>
+            <button id="menu-toggle" class="p-2 hover:bg-slate-800 rounded-lg">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </header>
+
+        <!-- Mobile Sidebar Backdrop -->
+        <div id="sidebar-backdrop" class="hidden fixed inset-0 bg-black/50 z-30 md:hidden"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="hidden md:block w-64 md:w-64 bg-slate-900 text-white fixed md:relative h-screen overflow-y-auto z-40 md:z-auto left-0 top-0">
+            <div class="p-6 border-b border-slate-800">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-xl font-bold">Loja Minimal</h1>
+                        <p class="text-xs text-slate-400 mt-1">Painel Administrativo</p>
+                    </div>
+                    <button id="close-sidebar-mobile" class="md:hidden p-2 hover:bg-slate-800 rounded-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <nav class="p-4 space-y-2">
+                <button class="menu-btn w-full text-left px-4 py-3 rounded-lg hover:bg-slate-800 transition is-active text-base" data-page="dashboard">
+                    <span class="block font-medium">Dashboard</span>
+                </button>
+                <button class="menu-btn w-full text-left px-4 py-3 rounded-lg hover:bg-slate-800 transition text-base" data-page="preview">
+                    <span class="block font-medium">Preview Loja</span>
+                </button>
+                <button class="menu-btn w-full text-left px-4 py-3 rounded-lg hover:bg-slate-800 transition text-base" data-page="products">
+                    <span class="block font-medium">Produtos</span>
+                </button>
+                <button class="menu-btn w-full text-left px-4 py-3 rounded-lg hover:bg-slate-800 transition text-base" data-page="categories">
+                    <span class="block font-medium">Categorias</span>
+                </button>
+                <button class="menu-btn w-full text-left px-4 py-3 rounded-lg hover:bg-slate-800 transition text-base" data-page="orders">
+                    <span class="block font-medium">Pedidos</span>
+                </button>
+                <button class="menu-btn w-full text-left px-4 py-3 rounded-lg hover:bg-slate-800 transition text-base" data-page="tracking">
+                    <span class="block font-medium">Rastreio</span>
+                </button>
+                <button class="menu-btn w-full text-left px-4 py-3 rounded-lg hover:bg-slate-800 transition text-base" data-page="checkouts">
+                    <span class="block font-medium">Checkouts</span>
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-slate-800 mt-6">
+                <button id="logoutBtn" class="w-full px-4 py-3 bg-slate-800 hover:bg-slate-700 rounded-lg font-medium transition text-base">
+                    Sair
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-auto md:ml-0 w-full">
+            <header class="bg-white border-b border-slate-200 sticky top-0 z-40 hidden md:block">
+                <div class="max-w-full px-8 py-4 flex items-center justify-between">
+                    <h2 id="pageTitle" class="text-2xl font-bold">Dashboard</h2>
+                    <span id="adminBadge" class="text-sm bg-emerald-100 text-emerald-700 px-4 py-2 rounded-full">Admin</span>
+                </div>
+            </header>
+
+            <div class="p-4 md:p-8 space-y-6 pb-20">
+                <!-- Dashboard -->
+                <section id="dashboard-page" class="page-content space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-white border border-slate-200 rounded-2xl p-6">
+                            <p class="text-sm text-slate-600 font-medium">Produtos</p>
+                            <p id="stat-products" class="text-3xl font-bold mt-2">0</p>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-2xl p-6">
+                            <p class="text-sm text-slate-600 font-medium">Pedidos</p>
+                            <p id="stat-orders" class="text-3xl font-bold mt-2">0</p>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-2xl p-6">
+                            <p class="text-sm text-slate-600 font-medium">Receita</p>
+                            <p id="stat-revenue" class="text-3xl font-bold text-emerald-600 mt-2">R$ 0,00</p>
+                        </div>
+                        <div class="bg-white border border-slate-200 rounded-2xl p-6">
+                            <p class="text-sm text-slate-600 font-medium">Categorias</p>
+                            <p id="stat-categories" class="text-3xl font-bold mt-2">0</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6">
+                        <h3 class="text-lg font-semibold mb-4">Últimos Pedidos</h3>
+                        <ul id="recent-orders" class="space-y-3"></ul>
+                    </div>
+                </section>
+
+                <!-- Preview Loja -->
+                <section id="preview-page" class="page-content hidden">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 space-y-6">
+                        <h3 class="text-lg font-semibold">Preview e Customização da Loja</h3>
+                        
+                        <!-- Banner Upload -->
+                        <div>
+                            <h4 class="font-semibold text-slate-900 mb-1">🎨 Banner da Loja</h4>
+                            <p class="text-xs text-slate-600 mb-3">Tamanho recomendado: 1200 x 300 px</p>
+                            <div class="relative">
+                                <img id="banner-image" src="https://via.placeholder.com/1200x300?text=Banner+da+Loja" alt="Banner" class="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition border-2 border-slate-300">
+                                <input type="file" id="banner-upload" accept="image/*" multiple style="display: none;">
+                                <div class="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/20 transition rounded-lg" onclick="document.getElementById('banner-upload').click()">
+                                    <span class="text-white text-sm font-medium bg-black/60 px-4 py-2 rounded">📤 Adicionar banners</span>
+                                </div>
+                            </div>
+                            <div id="banner-thumbs" class="mt-3 grid grid-cols-3 sm:grid-cols-6 gap-2"></div>
+                        </div>
+
+                        <!-- Logo Upload -->
+                        <div>
+                            <h4 class="font-semibold text-slate-900 mb-1">🏷️ Logo da Loja</h4>
+                            <p class="text-xs text-slate-600 mb-3">Tamanho recomendado: 300 x 120 px</p>
+                            <div class="relative">
+                                <img id="logo-image" src="https://via.placeholder.com/300x120?text=Logo+da+Loja" alt="Logo" class="h-24 w-auto object-contain rounded-lg cursor-pointer hover:opacity-90 transition border-2 border-slate-300 bg-white px-3">
+                                <input type="file" id="logo-upload" accept="image/*" style="display: none;">
+                                <div class="absolute inset-0 flex items-center justify-center bg-black/0 hover:bg-black/20 transition rounded-lg" onclick="document.getElementById('logo-upload').click()">
+                                    <span class="text-white text-sm font-medium bg-black/60 px-4 py-2 rounded">📤 Enviar logo</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Produtos Arrastáveis -->
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-semibold text-slate-900">🎯 Organizar Produtos</h4>
+                                <p class="text-xs text-slate-600 bg-blue-50 px-3 py-1 rounded-full">🖱️ Arraste para reorganizar a ordem na loja</p>
+                            </div>
+                            <div id="products-drag-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                <!-- Produtos aparecrão aqui -->
+                            </div>
+                        </div>
+                        
+                        <!-- Categorias Arrastáveis -->
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="font-semibold text-slate-900">📂 Organizar Categorias</h4>
+                                <p class="text-xs text-slate-600 bg-blue-50 px-3 py-1 rounded-full">🖱️ Arraste para mudar ordem dos carrosséis</p>
+                            </div>
+                            <div id="categories-drag-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                <!-- Categorias aparecerão aqui -->
+                            </div>
+                        </div>
+                        
+                        <!-- Prévia do Cliente -->
+                        <div>
+                            <h4 class="font-semibold text-slate-900 mb-3">📱 Prévia do Cliente</h4>
+                            <iframe id="store-preview" src="cliente.html" class="w-full border border-slate-300 rounded-lg" style="height: 600px;"></iframe>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Produtos -->
+                <section id="products-page" class="page-content hidden">
+                    <div class="grid grid-cols-1 gap-4 md:gap-6">
+                        <div>
+                            <div class="bg-white border border-slate-200 rounded-2xl p-4 md:p-6">
+                                <h3 class="text-lg md:text-xl font-semibold mb-4">Cadastrar Produto</h3>
+                                <form id="product-form" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm md:text-base font-medium mb-2">Nome do Produto</label>
+                                        <input type="text" id="product-name" placeholder="Ex: Vestido Minimal" class="w-full border border-slate-300 rounded-lg px-4 py-2" required>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3 md:gap-4">
+                                        <div>
+                                            <label class="block text-sm md:text-base font-medium mb-2">Preço</label>
+                                            <input type="number" id="product-price" placeholder="Ex: 129.90" step="0.01" min="0" class="w-full border border-slate-300 rounded-lg px-4 py-2" required>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm md:text-base font-medium mb-2">Categoria</label>
+                                            <select id="product-category" class="w-full border border-slate-300 rounded-lg px-4 py-2" required>
+                                                <option value="">Selecione</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div id="product-colors-section" class="space-y-3">
+                                        <div>
+                                            <label class="block text-sm md:text-base font-medium mb-2">Cores e Imagens do Produto</label>
+                                            <p class="text-xs md:text-sm text-slate-600 mb-3">
+                                                Adicione cada cor com sua respectiva imagem. No site, ao selecionar a cor, a imagem mudará.
+                                            </p>
+                                            <div id="product-colors-list" class="space-y-3 mb-3"></div>
+                                            <button type="button" id="add-color-btn" class="w-full md:w-auto mt-2 text-sm md:text-base px-5 py-3 md:py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 transition font-semibold md:font-medium shadow-sm">
+                                                🎨 Adicionar Cor + Imagem
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-sm md:text-base font-medium mb-2">Descrição do Produto</label>
+                                        <p class="text-xs md:text-sm text-slate-600 mb-2">
+                                            Descreva as características, materiais, medidas e informações importantes do produto.
+                            <span class="font-medium text-slate-700">📸 Arraste e solte imagens aqui!</span>
+                        </p>
+
+                        <div 
+                            id="product-description" 
+                            contenteditable="true"
+                            data-placeholder="Ex: Vestido confeccionado em tecido de alta qualidade, confortável e elegante. Disponível em vários tamanhos. Composição: 95% algodão, 5% elastano. Lavagem: máquina em água fria."
+                            class="description-editor w-full border border-slate-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-slate-400 focus:border-transparent min-h-[150px] max-h-[400px] overflow-y-auto"
+                        ></div>
+                                    </div>
+
+                                    <button type="submit" class="w-full bg-slate-900 text-white py-3 md:py-2.5 rounded-lg font-semibold md:font-medium hover:bg-slate-800 transition text-base md:text-sm">
+                        Salvar Produto
+                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="bg-white border border-slate-200 rounded-2xl p-4 md:p-6">
+                                <h3 class="text-lg md:text-xl font-semibold mb-4">Produtos Cadastrados</h3>
+                                <ul id="products-list" class="space-y-2 md:space-y-3 max-h-[400px] md:max-h-[500px] overflow-y-auto"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Categorias -->
+                <section id="categories-page" class="page-content hidden">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 md:p-6">
+                        <h3 class="text-lg md:text-xl font-semibold mb-4">Categorias</h3>
+                        <form id="category-form" class="flex flex-col md:flex-row gap-3 md:gap-2 mb-6">
+                            <input type="text" id="category-name" placeholder="Nova categoria" class="flex-1 border border-slate-300 rounded-lg px-4 py-3 text-base md:text-sm md:py-2">
+                            <button type="submit" class="px-6 py-3 md:py-2 bg-slate-900 text-white rounded-lg font-semibold md:font-medium hover:bg-slate-800 transition text-base md:text-sm">
+                                Adicionar
+                            </button>
+                        </form>
+                        <ul id="categories-list" class="space-y-2 md:space-y-2"></ul>
+                    </div>
+                </section>
+
+                <!-- Pedidos -->
+                <section id="orders-page" class="page-content hidden">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 md:p-6">
+                        <h3 class="text-lg md:text-xl font-semibold mb-4">Pedidos</h3>
+                        <ul id="orders-list" class="space-y-3"></ul>
+                    </div>
+                </section>
+
+                <!-- Rastreio -->
+                <section id="tracking-page" class="page-content hidden">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 md:p-6">
+                        <h3 class="text-lg md:text-xl font-semibold mb-4">Rastreio (Consulta Linketrack)</h3>
+                        <p class="text-sm text-slate-600 mb-4">Consulte o status de rastreio de qualquer código dos Correios usando a API Linketrack.</p>
+                        
+                        <div class="tracking-box" style="background: #111; color: #fff; padding: 30px; border-radius: 8px; max-width: 100%; margin-bottom: 30px;">
+                            <h4 style="color: #fff; margin-bottom: 10px; font-weight: bold;">RASTREIO DE PEDIDO</h4>
+                            <p style="color: #fff; margin-bottom: 15px;">Insira o código abaixo:</p>
+                            <div class="input-group" style="display: flex; gap: 10px; margin-bottom: 20px;">
+                                <input type="text" id="codigo_rastreio_admin" placeholder="Ex: AA123456789BR" style="flex: 1; padding: 12px; border: 1px solid #333; background: #222; color: #fff; border-radius: 4px;">
+                                <button onclick="buscarRastreioAdmin()" style="background: #fff; color: #000; padding: 12px 20px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px;">BUSCAR</button>
+                            </div>
+                            
+                            <div id="status-container-admin" class="hidden" style="margin-top: 20px;">
+                                <div id="ultimo-status-admin" style="margin-bottom: 15px;"></div>
+                                <div id="lista-eventos-admin"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Checkouts -->
+                <section id="checkouts-page" class="page-content hidden">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 md:p-6">
+                        <h3 class="text-lg md:text-xl font-semibold mb-4">Dados de Checkout (Tráfego Pago)</h3>
+                        <button id="export-checkouts-csv" class="mb-4 w-full md:w-auto px-6 py-3 md:py-2 border border-slate-300 rounded-lg hover:bg-slate-100 transition font-medium text-base md:text-sm">
+                            📥 Exportar CSV
+                        </button>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs md:text-sm">
+                                <thead class="bg-slate-100 border-b border-slate-200">
+                                    <tr>
+                                        <th class="text-left px-2 md:px-4 py-3 md:py-2">Data</th>
+                                        <th class="text-left px-2 md:px-4 py-3 md:py-2">Cliente</th>
+                                        <th class="text-left px-2 md:px-4 py-3 md:py-2">Origem Login</th>
+                                        <th class="text-left px-2 md:px-4 py-3 md:py-2">Items</th>
+                                        <th class="text-left px-2 md:px-4 py-3 md:py-2">Total</th>
+                                        <th class="text-left px-2 md:px-4 py-3 md:py-2">WhatsApp</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="checkouts-table" class="divide-y divide-slate-200"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal de Edição de Produto -->
+    <div id="editProductModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <div class="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between rounded-t-2xl">
+                <h2 class="text-xl font-bold text-slate-900">✏️ Editar Produto</h2>
+                <button type="button" id="closeEditModal" class="text-slate-400 hover:text-slate-600 transition">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="edit-product-form" class="p-6 space-y-4">
+                <input type="hidden" id="edit-product-id">
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Nome do Produto</label>
+                    <input type="text" id="edit-product-name" class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Preço (R$)</label>
+                    <input type="number" id="edit-product-price" step="0.01" class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Categoria</label>
+                    <select id="edit-product-category" class="w-full border border-slate-300 rounded-lg px-4 py-2 text-sm" required>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Cores e Imagens</label>
+                    <div id="edit-product-colors-list" class="space-y-3 mb-3"></div>
+                    <button type="button" id="edit-add-color-btn" class="w-full md:w-auto text-sm px-5 py-2 bg-slate-800 text-white rounded-lg hover:bg-slate-900 transition">
+                        🎨 Adicionar Cor + Imagem
+                    </button>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Descrição</label>
+                    <div 
+                        id="edit-product-description" 
+                        contenteditable="true"
+                        data-placeholder="Digite a descrição do produto..."
+                        class="description-editor w-full border border-slate-300 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-slate-400 focus:border-transparent min-h-[120px] max-h-[300px] overflow-y-auto"
+                    ></div>
+                </div>
+                
+                <div class="flex gap-3 pt-4">
+                    <button type="submit" class="flex-1 bg-slate-900 text-white py-2.5 rounded-lg font-medium hover:bg-slate-800 transition">
+                        💾 Salvar Alterações
+                    </button>
+                    <button type="button" id="cancelEditModal" class="px-6 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
