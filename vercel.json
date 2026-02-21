@@ -1,20 +1,39 @@
 {
+  "version": 2,
+  "builds": [
+    {
+      "src": "backend/main.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "*.css",
+      "use": "@vercel/static"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/backend/main.py"
+      "destination": "backend/main.py"
     },
     {
-      "source": "/(.*).html",
-      "destination": "/$1.html"
+      "source": "/health",
+      "destination": "backend/main.py"
     },
     {
-      "source": "/(.*).js",
-      "destination": "/$1.js"
+      "source": "/cliente.html",
+      "destination": "/cliente.html"
     },
     {
-      "source": "/(.*).css",
-      "destination": "/$1.css"
+      "source": "/admin.html",
+      "destination": "/admin.html"
     }
   ]
 }
