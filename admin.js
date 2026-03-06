@@ -110,6 +110,33 @@ function init() {
   // Configurar redimensionamento de imagens
   setupImageResizing();
   
+  // Melhoria no Editor - Clique duplo para adicionar imagem
+  productDescription.addEventListener('dblclick', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = document.createElement('img');
+          img.src = event.target.result;
+          img.alt = file.name;
+          img.contentEditable = 'false';
+          img.style.maxWidth = '100%';
+          img.style.height = 'auto';
+          img.style.borderRadius = '8px';
+          img.style.margin = '8px 0';
+          img.style.display = 'block';
+          productDescription.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  });
+  
   // Page Navigation
   menuBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -149,6 +176,9 @@ function init() {
   renderDashboard();
   renderCategorySelect();
   renderAllPages();
+  
+  // Carregar produtos do banco Neon
+  fetchProductsFromDb();
 
   // Event Listeners
   productForm.addEventListener("submit", handleAddProduct);
@@ -566,276 +596,214 @@ function removeColorInput(idx) {
   document.querySelector(`[data-color-idx="${idx}"]`).remove();
 }
 
-function handleAddProduct(e) {
+async function handleAddProduct(e) {
   e.preventDefault();
-  console.log("handleAddProduct chamado!");
 
   const name = productName.value.trim();
   const price = parseFloat(productPrice.value);
   const catIdx = parseInt(productCategory.value);
   const description = productDescription.innerHTML.trim();
 
-  console.log("Valores:", {name, price, catIdx, description});
-
-  if (!name || !price || isNaN(catIdx) || catIdx < 0) {
+  // Validações básicas
+  if (!name || !price || isNaN(catIdx)) {
     alert("Preencha nome, preço e categoria");
-    console.log("Validação falhou!");
     return;
   }
-  
-  // Coletar cores
+
+  // Coletar cores e converter para Base64
   const colorDivs = document.querySelectorAll("[data-color-idx]");
-  console.log("Cores encontradas:", colorDivs.length);
-  
-  if (colorDivs.length === 0) {
-    alert("Adicione pelo menos uma cor com sua imagem!");
-    return;
-  }
-  
-  // Validar que todas as cores têm nome, hex e imagem
-  const colorPromises = [];
-  
-  colorDivs.forEach((colorDiv, idx) => {
+  const colorPromises = Array.from(colorDivs).map((colorDiv, idx) => {
     const nameInput = colorDiv.querySelector('.color-name-input');
-    const hexInput = colorDiv.querySelector('.color-hex-input');
     const imageInput = colorDiv.querySelector('.color-image-input');
-    
-    if (!nameInput || !hexInput || !imageInput) {
-      console.error("Inputs não encontrados para cor", idx);
-      return;
-    }
-    
-    const colorName = nameInput.value.trim();
-    const colorHex = hexInput.value;
-    const imageFile = imageInput.files[0];
-    
-    if (!colorName || !colorHex || !imageFile) {
-      alert(`Preencha todos os campos da Cor ${idx + 1} (nome, cor e imagem)`);
-      throw new Error("Validação de cor falhou");
-    }
-    
-    // Criar promise para ler a imagem
-    const promise = new Promise((resolve) => {
+    const hexInput = colorDiv.querySelector('.color-hex-input');
+
+    return new Promise((resolve) => {
       const reader = new FileReader();
-      reader.onload = (event) => {
-        resolve({
-          id: `color-${Date.now()}-${idx}`,
-          name: colorName,
-          hex: colorHex,
-          image: event.target.result // Base64
-        });
-      };
-      reader.readAsDataURL(imageFile);
+      reader.onload = (event) => resolve({
+        nome: nameInput.value,
+        hex: hexInput.value,
+        imagem: event.target.result
+      });
+      reader.readAsDataURL(imageInput.files[0]);
     });
-    
-    colorPromises.push(promise);
   });
-  
-  console.log("Lendo", colorPromises.length, "imagens...");
-  
-  // Aguardar todas as imagens serem lidas
-  Promise.all(colorPromises).then((colors) => {
-    console.log("Todas as imagens carregadas!");
+
+  try {
+    const colors = await Promise.all(colorPromises);
     
-    const product = {
-      id: `prod-${Date.now()}`,
-      name,
-      price,
-      category: categories[catIdx],
-      description: description || '',
-      colors: colors // Array de cores, cada uma com sua imagem
+    // MONTANDO O OBJETO PARA O BACKEND (Neon)
+    const payload = {
+      nome: name,
+      preco: price,
+      categoria: categories[catIdx],
+      descricao: description,
+      imagem_url: colors[0]?.imagem || ""
     };
 
-    console.log("Produto criado com", product.colors.length, "cores:", product);
-    products.push(product);
-    setStorage(STORAGE_KEYS.products, products);
-    console.log("Produto salvo! Total de produtos:", products.length);
+    const response = await fetch('http://127.0.0.1:8001/api/produtos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
-    // Resetar form
-    productForm.reset();
-    productDescription.innerHTML = '';
-    productColorsList.innerHTML = "";
-    productColors = {};
+    if (response.ok) {
+      alert("🚀 Produto salvo no Banco Neon!");
+      productForm.reset();
+      productDescription.innerHTML = '';
+      productColorsList.innerHTML = "";
+      productColors = {};
+      await fetchProductsFromDb();
+    } else {
+      alert("❌ Erro ao salvar no banco.");
+    }
+  } catch (error) {
+    console.error("Erro ao salvar:", error);
+    alert("Erro ao conectar com o servidor.");
+  }
+}
 
-    renderAllPages();
-    alert("Produto adicionado com sucesso!");
-  }).catch((error) => {
-    console.error("Erro ao processar cores:", error);
-  });
+async function fetchProductsFromDb() {
+  if (productsList) productsList.innerHTML = '<p class="p-4 text-slate-500">Carregando produtos do Neon...</p>';
+  try {
+    const response = await fetch('http://127.0.0.1:8001/api/produtos');
+    if (response.ok) {
+      products = await response.json();
+      renderProducts();
+      renderAllPages();
+    }
+  } catch (error) {
+    console.error("Erro ao carregar produtos:", error);
+  }
 }
 
 function renderProducts() {
   productsList.innerHTML = products.map((prod) => {
-    // Extrair texto da descrição (sem HTML/imagens) para preview
-    const descriptionText = prod.description 
-      ? prod.description.replace(/<img[^>]*>/g, '[imagem]').replace(/<[^>]+>/g, '').trim()
-      : '';
-    
+    // Ajuste aqui: usa prod.imagem_url que vem do Neon
+    const mainImage = prod.imagem_url ? 
+      `<img src="${prod.imagem_url}" alt="${prod.nome}" class="w-16 h-16 object-cover rounded-lg border border-slate-300">` : 
+      '<div class="w-16 h-16 bg-slate-200 rounded-lg flex items-center justify-center text-xs text-slate-400">Sem imagem</div>';
+
     return `
     <li class="p-3 bg-slate-50 rounded-lg border border-slate-200">
       <div class="flex gap-3">
-        <div class="flex-shrink-0">
-          ${prod.colors && prod.colors.length > 0 ? 
-            `<img src="${prod.colors[0].image}" alt="${prod.name}" class="w-16 h-16 object-cover rounded-lg border border-slate-300">` 
-            : '<div class="w-16 h-16 bg-slate-200 rounded-lg flex items-center justify-center text-xs text-slate-400">Sem imagem</div>'
-          }
-        </div>
+        <div class="flex-shrink-0">${mainImage}</div>
         <div class="flex-1 min-w-0">
-          <p class="font-medium text-sm">${prod.name}</p>
-          <p class="text-xs text-slate-600">${formatCurrency(prod.price)}</p>
-          <p class="text-xs text-slate-500 mt-1">
-            ${prod.colors && prod.colors.length > 0 
-              ? `<span class="font-semibold">${prod.colors.length} cor${prod.colors.length > 1 ? 'es' : ''}:</span> ${prod.colors.map((c) => c.name).join(", ")}`
-              : 'Sem cores'
-            }
-          </p>
-          ${descriptionText ? `<p class="text-xs text-slate-600 mt-1 line-clamp-2">${descriptionText}</p>` : ''}
+          <p class="font-medium text-sm">${prod.nome}</p>
+          <p class="text-xs text-slate-600">${formatCurrency(prod.preco)}</p>
+          <p class="text-xs text-slate-500 mt-1">${prod.categoria}</p>
         </div>
         <div class="flex gap-2 self-start">
-          <button class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition whitespace-nowrap" onclick="editProduct('${prod.id}')" title="Editar produto">
-            ✏️
-          </button>
-          <button class="text-xs px-2 py-1 bg-rose-100 text-rose-600 rounded hover:bg-rose-200 transition whitespace-nowrap" onclick="deleteProduct('${prod.id}')" title="Remover produto">
-            ×
-          </button>
+          <button class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition" 
+            onclick="editProduct(${prod.id})"> ✏️ </button>
+          <button class="text-xs px-2 py-1 bg-rose-100 text-rose-600 rounded hover:bg-rose-200 transition" 
+            onclick="deleteProduct(${prod.id})"> × </button>
         </div>
       </div>
-    </li>
-  `;
+    </li>`;
   }).join("");
 }
 
-function deleteProduct(id) {
-  products = products.filter((p) => p.id !== id);
-  setStorage(STORAGE_KEYS.products, products);
-  renderAllPages();
+async function deleteProduct(id) {
+  if (!confirm("Tem certeza que deseja excluir este produto do banco Neon?")) return;
+
+  try {
+    const response = await fetch(`http://127.0.0.1:8001/api/produtos/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (response.ok) {
+      alert("🗑️ Produto removido com sucesso!");
+      await fetchProductsFromDb(); // Recarrega a lista atualizada
+    } else {
+      alert("Erro ao deletar no servidor.");
+    }
+  } catch (error) {
+    console.error("Erro:", error);
+  }
 }
 
 function editProduct(id) {
-  const product = products.find(p => p.id === id);
-  if (!product) return;
+  const product = products.find(p => String(p.id) === String(id));
+  if (!product) {
+    console.error("Produto não encontrado com ID:", id);
+    return;
+  }
   
   // Resetar cores de edição
   editProductColors = {};
   
-  // Popular campos do formulário
+  // Popular campos do formulário (usando nomes vindos do Neon em português)
   editProductId.value = product.id;
-  editProductName.value = product.name;
-  editProductPrice.value = product.price;
-  editProductDescription.innerHTML = product.description || '';
+  editProductName.value = product.nome || '';
+  editProductPrice.value = product.preco ? product.preco / 100 : 0; // Converte de centavos para reais
+  editProductDescription.innerHTML = product.descricao || '';
   
   // Popular select de categorias
+  const catIndex = categories.indexOf(product.categoria || 'Geral');
   editProductCategory.innerHTML = categories.map((cat, idx) => 
-    `<option value="${idx}" ${product.category === cat ? 'selected' : ''}>${cat}</option>`
+    `<option value="${idx}" ${idx === catIndex ? 'selected' : ''}>${cat}</option>`
   ).join('');
-  
-  // Popular cores existentes
-  editProductColorsList.innerHTML = '';
-  if (product.colors && product.colors.length > 0) {
-    product.colors.forEach((color, idx) => {
-      editProductColors[idx] = {
-        name: color.name,
-        hex: color.hex || '#000000',
-        image: color.image
-      };
-      renderEditProductColor(idx, color.name, color.image, color.hex || '#000000');
-    });
-  }
   
   // Abrir modal
   editProductModal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
 }
 
+// 1. Corrigindo o fechamento da função closeEditProductModal
 function closeEditProductModal() {
   editProductModal.classList.add('hidden');
   document.body.style.overflow = '';
   editProductColors = {};
   editProductColorsList.innerHTML = '';
   editProductForm.reset();
-}
+} // Faltava fechar aqui!
 
-function handleEditProduct(e) {
+// 2. Corrigindo e completando a função handleEditProduct
+async function handleEditProduct(e) {
   e.preventDefault();
-  
-  console.log('=== INICIANDO EDIÇÃO DE PRODUTO ===');
   
   const id = editProductId.value;
   const name = editProductName.value.trim();
   const price = parseFloat(editProductPrice.value);
   const catIdx = parseInt(editProductCategory.value);
   const description = editProductDescription.innerHTML.trim();
-  
-  console.log('Dados capturados:', {
-    id,
-    name,
-    price,
-    catIdx,
-    description: description.substring(0, 50) + '...',
-    categoriesLength: categories.length,
-    categoryValue: editProductCategory.value
-  });
-  
-  if (!name) {
-    alert('⚠️ Nome do produto é obrigatório');
+
+  // Validação básica
+  if (!name || isNaN(price)) {
+    alert("Preencha os campos obrigatórios.");
     return;
   }
-  
-  if (!price || isNaN(price) || price <= 0) {
-    alert('⚠️ Preço inválido. Digite um valor válido.');
-    return;
-  }
-  
-  if (isNaN(catIdx) || catIdx < 0 || catIdx >= categories.length) {
-    alert('⚠️ Selecione uma categoria válida');
-    console.log('Categoria inválida:', { catIdx, categories });
-    return;
-  }
-  
-  // Coletar cores
-  const colors = [];
-  Object.values(editProductColors).forEach(color => {
-    if (color && color.name && color.image) {
-      colors.push({
-        name: color.name,
-        hex: color.hex || '#000000',
-        image: color.image
-      });
+
+  // Coleta a primeira imagem das cores para ser a imagem principal no Neon
+  const colorKeys = Object.keys(editProductColors);
+  const mainImage = colorKeys.length > 0 ? editProductColors[colorKeys[0]].image : "";
+
+  const payload = {
+    nome: name,
+    preco: price,
+    categoria: categories[catIdx] || "Geral",
+    descricao: description,
+    imagem_url: mainImage
+  };
+
+  try {
+    const response = await fetch(`http://127.0.0.1:8001/api/produtos/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (response.ok) {
+      alert("✅ Produto atualizado no Banco Neon!");
+      closeEditProductModal();
+      await fetchProductsFromDb(); // Recarrega a lista
+    } else {
+      const errorData = await response.json();
+      alert(`❌ Erro ao atualizar: ${errorData.detail || "Erro no servidor"}`);
     }
-  });
-  
-  console.log('Cores coletadas:', colors.length);
-  
-  // Encontrar e atualizar produto
-  const productIndex = products.findIndex(p => p.id === id);
-  console.log('Índice do produto:', productIndex);
-  
-  if (productIndex !== -1) {
-    const oldProduct = { ...products[productIndex] };
-    
-    products[productIndex] = {
-      ...products[productIndex],
-      name,
-      price,
-      category: categories[catIdx],
-      description,
-      colors
-    };
-    
-    console.log('Produto ANTES:', oldProduct);
-    console.log('Produto DEPOIS:', products[productIndex]);
-    
-    setStorage(STORAGE_KEYS.products, products);
-    console.log('✅ Produto salvo no localStorage');
-    
-    renderAllPages();
-    console.log('✅ Páginas renderizadas');
-    
-    closeEditProductModal();
-    alert('✅ Produto atualizado com sucesso!');
-  } else {
-    alert('❌ Produto não encontrado!');
-    console.error('Produto não encontrado com ID:', id);
+  } catch (error) {
+    console.error("Erro na edição:", error);
+    alert("Erro ao conectar com o servidor.");
   }
 }
 
@@ -1189,7 +1157,7 @@ function showOrderDetail(orderUuid) {
                   <div class="flex-1">
                     <div class="font-medium">${item.name}</div>
                     <div class="text-slate-600">Cor: <strong>${item.color}</strong> • Tamanho: <strong>${item.size}</strong></div>
-                    <div class="text-slate-600">Quantidade: ${item.quantity}x • Preço: ${formatCurrency(item.price)}</div>
+                    <div class="text-slate-600">Quantidade: ${item.quantity}x • Preco: ${formatCurrency(item.price)}</div>
                   </div>
                   <div class="text-right font-semibold">${formatCurrency(item.subtotal)}</div>
                 </div>
@@ -1803,7 +1771,7 @@ function renderCategoriesDragGrid() {
       <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg overflow-hidden hover:shadow-lg transition p-4 text-center text-white min-h-[100px] flex flex-col items-center justify-center">
         <div class="text-3xl mb-2">📁</div>
         <h4 class="font-bold text-sm truncate w-full px-2">${categoryName}</h4>
-        <p class="text-xs opacity-90 mt-2 font-medium">🖱️ Ordem: ${idx + 1}</p>
+        <p class="text-xs opacity-90 mt-2 font-medium">🔢 Ordem: ${idx + 1}</p>
       </div>
     </div>
   `).join('');
@@ -2098,3 +2066,4 @@ async function buscarRastreioAdmin() {
 
 // Initialize on Load
 window.addEventListener("DOMContentLoaded", init);
+

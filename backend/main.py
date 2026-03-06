@@ -1,11 +1,14 @@
 import os
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
 from datetime import datetime, timezone
 from typing import Optional
 from urllib.parse import urlencode
 
 import requests
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
@@ -21,7 +24,40 @@ GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI", "http://127.0.0.1:8000/api/auth/google/callback")
 
 AUTH_ALLOW_QUICK_FALLBACK = os.getenv("AUTH_ALLOW_QUICK_FALLBACK", "true").lower() == "true"
+# --- CONFIGURAÇÃO DO BANCO DE DADOS ---
+# O os.getenv busca a "chave do cofre" que a Vercel criou automaticamente
+DATABASE_URL = os.getenv("DATABASE_URL")
 
+# Pequeno ajuste para o SQLAlchemy entender o link do Postgres da Vercel
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# Cria o motor de conexão e a fábrica de sessões
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+# --- MODELO DE USUÁRIO ---
+# Aqui definimos como a tabela será criada no banco Neon
+class Usuario(Base):
+    __tablename__ = "usuarios"
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True)
+    nome = Column(String)
+
+# --- MODELO DE PRODUTO ATUALIZADO ---
+class Produto(Base):
+    __tablename__ = "produtos"
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String, nullable=False)
+    categoria = Column(String)  # <--- NOVA COLUNA ADICIONADA
+    descricao = Column(String)
+    preco = Column(Integer)
+    imagem_url = Column(String)
+    estoque = Column(Integer, default=0)
+
+# Esse comando cria a tabela no banco de verdade se ela não existir
+Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Loja Minimal Backend")
 
 app.add_middleware(
@@ -76,7 +112,13 @@ def _quick_social_user(provider: str):
         "provider": provider,
     }
 
-
+# Função para obter uma conexão com o banco de dados
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 def _build_frontend_redirect(frontend_redirect: Optional[str], params: dict):
     redirect_base = frontend_redirect or FRONTEND_URL
     query = urlencode(params)
@@ -341,7 +383,12 @@ def auth_google_start(frontend_redirect: Optional[str] = None):
 
 
 @app.get("/api/auth/google/callback")
-def auth_google_callback(code: Optional[str] = None, state: Optional[str] = None, error: Optional[str] = None):
+def auth_google_callback(
+    code: Optional[str] = None,
+    state: Optional[str] = None,
+    error: Optional[str] = None,
+    db: Session = Depends(get_db),
+):
     frontend_redirect = state or FRONTEND_URL
 
     if error:
@@ -380,6 +427,19 @@ def auth_google_callback(code: Optional[str] = None, state: Optional[str] = None
             "email": data.get("email"),
             "picture": data.get("picture"),
         }
+
+        # Salva no Neon sem quebrar o redirecionamento final
+        try:
+            email = user.get("email")
+            nome = user.get("name")
+            if email:
+                existente = db.query(Usuario).filter(Usuario.email == email).first()
+                if not existente:
+                    db.add(Usuario(email=email, nome=nome))
+                    db.commit()
+        except Exception:
+            db.rollback()
+
         return _redirect_success("google", user, frontend_redirect, "oauth")
     except Exception:
         return _redirect_error("google", frontend_redirect, "Erro interno no OAuth Google")
@@ -393,3 +453,34 @@ def auth_logout(payload: LogoutRequest):
         "customerId": payload.customerId,
         "at": datetime.now(timezone.utc).isoformat(),
     }
+
+class ProdutoRequest(BaseModel):
+    nome: str
+    preco: float
+    descricao: Optional[str] = None
+    categoria: str
+    imagem_url: Optional[str] = None
+
+@app.post("/api/produtos")
+def cadastrar_produto(payload: ProdutoRequest, db: Session = Depends(get_db)):
+    try:
+        novo_produto = Produto(
+            nome=payload.nome,
+            preco=int(payload.preco * 100),
+            categoria=payload.categoria,
+            descricao=payload.descricao,
+            imagem_url=payload.imagem_url
+        )
+        db.add(novo_produto)
+        db.commit()
+        db.refresh(novo_produto)
+        return {"status": "sucesso", "id": novo_produto.id}
+    except Exception as e:
+        db.rollback()
+        print(f"Erro detalhado: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao salvar no banco")
+
+
+@app.get("/api/produtos")
+def listar_produtos(db: Session = Depends(get_db)):
+    return db.query(Produto).all()
