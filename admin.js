@@ -32,6 +32,7 @@ let editProductModal, closeEditModal, cancelEditModal, editProductForm;
 let editProductId, editProductName, editProductPrice, editProductCategory, editProductDescription;
 let editProductColorsList, editAddColorBtn;
 let editProductColors = {};
+const API_URL = "/api";
 
 // Utility Functions
 function getStorage(key, defaultValue) {
@@ -640,7 +641,7 @@ async function handleAddProduct(e) {
       imagem_url: colors[0]?.imagem || ""
     };
 
-    const response = await fetch('http://127.0.0.1:8001/api/produtos', {
+    const response = await fetch(`${API_URL}/produtos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -665,7 +666,7 @@ async function handleAddProduct(e) {
 async function fetchProductsFromDb() {
   if (productsList) productsList.innerHTML = '<p class="p-4 text-slate-500">Carregando produtos do Neon...</p>';
   try {
-    const response = await fetch('http://127.0.0.1:8001/api/produtos');
+    const response = await fetch(`${API_URL}/produtos`);
     if (response.ok) {
       products = await response.json();
       renderProducts();
@@ -707,7 +708,7 @@ async function deleteProduct(id) {
   if (!confirm("Tem certeza que deseja excluir este produto do banco Neon?")) return;
 
   try {
-    const response = await fetch(`http://127.0.0.1:8001/api/produtos/${id}`, {
+    const response = await fetch(`${API_URL}/produtos/${id}`, {
       method: 'DELETE'
     });
 
@@ -787,7 +788,7 @@ async function handleEditProduct(e) {
   };
 
   try {
-    const response = await fetch(`http://127.0.0.1:8001/api/produtos/${id}`, {
+    const response = await fetch(`${API_URL}/produtos/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)

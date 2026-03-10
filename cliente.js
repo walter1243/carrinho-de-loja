@@ -102,7 +102,7 @@ const AUTH_API = {
   logout: "/api/auth/logout",
 };
 
-const BACKEND_BASE_URL = window.__BACKEND_BASE_URL__ || "http://127.0.0.1:8000";
+const BACKEND_BASE_URL = window.__BACKEND_BASE_URL__ || "";
 
 function authApiUrl(path) {
   if (!path) return BACKEND_BASE_URL;
@@ -2373,7 +2373,7 @@ async function loadProducts() {
   // API comentada - usando apenas localStorage
   /*
   try {
-    const response = await fetch("http://localhost:8000/api/products");
+    const response = await fetch("/api/products");
     if (response.ok) {
       const data = await response.json();
       const apiProducts = Array.isArray(data) ? data : data.products || [];
